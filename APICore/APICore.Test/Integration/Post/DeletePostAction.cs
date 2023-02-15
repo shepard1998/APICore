@@ -8,6 +8,7 @@ using APICore.Data.Entities;
 using APICore.Data.Entities.Enums;
 using APICore.Data.UoW;
 using APICore.Services;
+using APICore.Services.Exceptions;
 using APICore.Services.Impls;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -30,7 +31,7 @@ namespace APICore.Tests.Integration.Post
 
             SeedAsync().Wait();
         }
-        
+
         private async Task SeedAsync()
         {
             await using var context = new CoreDbContext(ContextOptions);
@@ -67,10 +68,11 @@ namespace APICore.Tests.Integration.Post
                 User = new ClaimsPrincipal(claimsPrincipal)
             };
             httpContext.Request.Headers.Add("Authorization", @"Bearer s0m34cc$3$$T0k3n");
-            
-            using var context = new CoreDbContext(ContextOptions);
-            
-            var postService = new PostService(new UnitOfWork(context), new Mock<IStringLocalizer<IAccountService>>().Object);
+
+            await using var context = new CoreDbContext(ContextOptions);
+
+            var postService = new PostService(new UnitOfWork(context),
+                new Mock<IStringLocalizer<IAccountService>>().Object);
             var postController = new PostController(postService, new Mock<AutoMapper.IMapper>().Object)
             {
                 ControllerContext = new ControllerContext()
@@ -79,15 +81,58 @@ namespace APICore.Tests.Integration.Post
                 }
             };
 
-            var fakePostRequest = new DeletePostRequest();
-            fakePostRequest.Id = 1;
-            
+            var fakePostRequest = new DeletePostRequest
+            {
+                Id = 1
+            };
+
             //ACT
             await postController.AddPostAsync(new AddPostRequest());
             var taskResult = (ObjectResult)postController.DeletePostAsync(fakePostRequest).Result;
-            
+
             //ASSERT
             Assert.Equal(200, taskResult.StatusCode);
+        }
+
+        [Fact(DisplayName = "Wrong Post Id Should Return Not Found Exception")]
+        public async void WrongPostIdShouldReturnNotFoundException()
+        {
+            //ARRANGE
+            var fakeClaims = new List<Claim>()
+            {
+                new(ClaimTypes.UserData, "4")
+            };
+            var identity = new ClaimsIdentity(fakeClaims, "Test");
+            var claimsPrincipal = new ClaimsPrincipal(identity);
+            var httpContext = new DefaultHttpContext
+            {
+                User = new ClaimsPrincipal(claimsPrincipal)
+            };
+            httpContext.Request.Headers.Add("Authorization", @"Bearer s0m34cc$3$$T0k3n");
+
+            await using var context = new CoreDbContext(ContextOptions);
+
+            var postService = new PostService(new UnitOfWork(context),
+                new Mock<IStringLocalizer<IAccountService>>().Object);
+            var postController = new PostController(postService, new Mock<AutoMapper.IMapper>().Object)
+            {
+                ControllerContext = new ControllerContext()
+                {
+                    HttpContext = httpContext
+                }
+            };
+
+            var fakePostRequest = new DeletePostRequest
+            {
+                Id = 10
+            };
+
+            //ACT
+            var aggregateException = postController.DeletePostAsync(fakePostRequest).Exception;
+            var taskResult = (BaseNotFoundException)aggregateException?.InnerException;
+
+            //ASSERT
+            if (taskResult != null) Assert.Equal(404, taskResult.HttpCode);
         }
     }
 }

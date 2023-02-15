@@ -49,10 +49,17 @@ namespace APICore.Services.Impls
 
         public async Task AddPostAsync(AddPostRequest postRequest, int currentUser)
         {
-            var post = new Post();
-            post.Text = postRequest.Text;
-            post.CreatedAt = DateTime.Now;
-            post.UserId = currentUser;
+            if (postRequest.Text == "")
+            {
+                throw new EmptyPostTextBadRequestException(_localizer);
+            }
+            
+            var post = new Post
+            {
+                Text = postRequest.Text,
+                CreatedAt = DateTime.Now,
+                UserId = currentUser
+            };
 
             await _uow.PostRepository.AddAsync(post);
             await _uow.CommitAsync();

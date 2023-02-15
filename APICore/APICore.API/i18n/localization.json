@@ -84,6 +84,13 @@
       "es-ES": "El Email de usuario no puede estar vacío"
     }
   },
+  {
+    "Key": "400012",
+    "LocalizedValue": {
+      "en-US": "Post text can't be Empty",
+      "es-ES": "El texto de la publicación no puede estar vacío"
+    }
+  },
   //Unauthorized
   {
     "Key": "401",

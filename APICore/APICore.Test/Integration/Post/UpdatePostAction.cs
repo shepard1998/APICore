@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using APICore.API.BasicResponses;
 using APICore.API.Controllers;
 using APICore.Common.DTO.Request;
 using APICore.Data;
@@ -9,6 +8,7 @@ using APICore.Data.Entities;
 using APICore.Data.Entities.Enums;
 using APICore.Data.UoW;
 using APICore.Services;
+using APICore.Services.Exceptions;
 using APICore.Services.Impls;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -52,7 +52,7 @@ namespace APICore.Tests.Integration.Post
             }
         }
 
-        [Fact(DisplayName = "Successfuly Update Post Should Return Ok Status Code (200)")]
+        [Fact(DisplayName = "Successfully Update Post Should Return Ok Status Code (200)")]
         public async void SuccessfullyUpdatePostShouldReturnOk()
         {
             //ARRANGE
@@ -67,8 +67,8 @@ namespace APICore.Tests.Integration.Post
                 User = new ClaimsPrincipal(claimsPrincipal)
             };
             httpContext.Request.Headers.Add("Authorization", @"Bearer s0m34cc$3$$T0k3n");
-            
-            using var context = new CoreDbContext(ContextOptions);
+
+            await using var context = new CoreDbContext(ContextOptions);
             
             var postService = new PostService(new UnitOfWork(context), new Mock<IStringLocalizer<IAccountService>>().Object);
             var postController = new PostController(postService, new Mock<AutoMapper.IMapper>().Object)
@@ -79,16 +79,60 @@ namespace APICore.Tests.Integration.Post
                 }
             };
 
-            var fakePostRequest = new UpdatePostRequest();
-            fakePostRequest.Id = 1;
-            fakePostRequest.Text = "Text updated!";
-            
+            var fakePostRequest = new UpdatePostRequest
+            {
+                Id = 1,
+                Text = "Text updated!"
+            };
+
             //ACT
             await postController.AddPostAsync(new AddPostRequest());
             var taskResult = (ObjectResult)postController.UpdatePostAsync(fakePostRequest).Result;
             
             //ASSERT
             Assert.Equal(200, taskResult.StatusCode);
+        }
+
+        [Fact(DisplayName = "Wrong Post Id Should Return Not Found Exception")]
+        public async void WrongPostIdShouldReturnNotFoundException()
+        {
+            //ARRANGE
+            var fakeClaims = new List<Claim>()
+            {
+                new(ClaimTypes.UserData, "4")
+            };
+            var identity = new ClaimsIdentity(fakeClaims, "Test");
+            var claimsPrincipal = new ClaimsPrincipal(identity);
+            var httpContext = new DefaultHttpContext
+            {
+                User = new ClaimsPrincipal(claimsPrincipal)
+            };
+            httpContext.Request.Headers.Add("Authorization", @"Bearer s0m34cc$3$$T0k3n");
+
+            await using var context = new CoreDbContext(ContextOptions);
+            
+            var postService = new PostService(new UnitOfWork(context), new Mock<IStringLocalizer<IAccountService>>().Object);
+            var postController = new PostController(postService, new Mock<AutoMapper.IMapper>().Object)
+            {
+                ControllerContext = new ControllerContext()
+                {
+                    HttpContext = httpContext
+                }
+            };
+
+            var fakePostRequest = new UpdatePostRequest
+            {
+                Id = 1,
+                Text = "Text updated!"
+            };
+
+            //ACT
+            var aggregateException = postController.UpdatePostAsync(fakePostRequest).Exception;
+            var taskResult = (BaseNotFoundException)aggregateException?.InnerException;
+
+            //ASSERT
+            if (taskResult != null) Assert.Equal(404, taskResult.HttpCode);
+            
         }
     }
 }
