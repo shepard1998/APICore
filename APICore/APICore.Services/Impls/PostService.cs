@@ -68,7 +68,7 @@ namespace APICore.Services.Impls
         public async Task<Post> UpdatePostAsync(UpdatePostRequest postRequest)
         {
             var post = await _uow.PostRepository.FirstOrDefaultAsync(u => u.Id == postRequest.Id);
-
+            Console.WriteLine("here");
             if (post == null)
             {
                 throw new PostNotFoundException(_localizer);

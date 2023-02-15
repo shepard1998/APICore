@@ -27,11 +27,10 @@ namespace APICore.API.Controllers
         /// <summary>
         /// Add new post. Requires authentication
         /// </summary>
-        /// <param name="post">
-        /// Post request object. Include the text of the post. 
-        /// </param>
         [HttpPost]
         [Authorize]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.Created)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> AddPostAsync([FromBody] AddPostRequest postRequest)
         {
@@ -45,27 +44,27 @@ namespace APICore.API.Controllers
         /// <summary>
         /// Update post. Requires Authentication
         /// </summary>
-        /// <param name="update">
-        /// Update request object. Include the new text of the post and post id.
-        /// </param>
         [HttpPost("update-post")]
         [Authorize]
-        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> UpdatePostAsync([FromBody] UpdatePostRequest postRequest)
         {
-            var post = await _postService.UpdatePostAsync(postRequest);
+            var result = await _postService.UpdatePostAsync(postRequest);
+            var post = _mapper.Map<PostResponse>(result);
+            
             return Ok(new ApiOkResponse(post));
         }
-        
+
         /// <summary>
         /// Delete post. Requires Authentication
         /// </summary>
-        /// <param name="delete">
-        /// Delete request object. Include the id of the post you want to delete.
-        /// </param>
         [HttpDelete("delete-post")]
         [Authorize]
-        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> DeletePostAsync([FromBody] DeletePostRequest postRequest)
         {
             await _postService.DeletePostAsync(postRequest);
@@ -78,6 +77,7 @@ namespace APICore.API.Controllers
         [HttpGet()]
         [Authorize]
         [ProducesResponseType((int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.Unauthorized)]
         public async Task<IActionResult> GetAllPosts()
         {
             var result = await _postService.GetPostAsync();
@@ -91,6 +91,8 @@ namespace APICore.API.Controllers
         [HttpGet("current-user-posts")]
         [Authorize]
         [ProducesResponseType((int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> GetCurrentUserPosts()
         {
             var claimsIdentity = this.User.Identity as ClaimsIdentity;

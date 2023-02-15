@@ -122,7 +122,7 @@ namespace APICore.Tests.Integration.Post
 
             var fakePostRequest = new UpdatePostRequest
             {
-                Id = 1,
+                Id = 9,
                 Text = "Text updated!"
             };
 

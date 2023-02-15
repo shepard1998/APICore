@@ -158,10 +158,10 @@
     }
   },
   {
-    "key": "404004",
+    "Key": "404004",
     "LocalizedValue": {
-      "en-Us": "Post not found.",
-      "es-Es": "Publicación no encontrada."
+      "en-US": "Post not found.",
+      "es-ES": "Publicación no encontrada."
     }
   },
   //RequestTimeout
