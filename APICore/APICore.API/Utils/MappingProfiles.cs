@@ -29,7 +29,7 @@ namespace APICore.API.Utils
             CreateMap<Log, LogResponse>()
                .ForMember(d => d.LogType, opts => opts.MapFrom(source => source.LogType.ToString()))
                .ForMember(d => d.EventType, opts => opts.MapFrom(source => source.EventType.ToString()));
-
+            CreateMap<Post, PostResponse>();
         }
     }
 }

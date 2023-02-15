@@ -21,6 +21,7 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using APICore.Common.DTO.Response;
 
 namespace APICore.API
 {
@@ -70,6 +71,7 @@ namespace APICore.API
             services.AddTransient<IEmailService, EmailService>();
             services.AddTransient<ILogService, LogService>();
             services.AddTransient<IStorageService, StorageService>();
+            services.AddTransient<IPostService, PostService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
