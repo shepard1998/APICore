@@ -4,6 +4,53 @@
 
 The solution includes the API to be reused. 
 
+# New features
+## Post entity
+I created a Post entity with 4 attributes.
+```
+public class Post
+    {
+        public int Id { get; set; }
+        public int UserId { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public string Text { get; set; }
+    }
+```
+
+-UserId -> The id of the User that creates the post.
+
+-CreatedAt -> Date of creation.
+
+-Text -> Text body of the post.
+
+## New Migration added
+Added a new Migration for the Post table in database.
+
+## Post DTOs
+New request and responses DTOs added for Post entity.
+
+## Exception Handling
+New PostNotFoundException and EmptyPostTextBadRequestException.
+
+## Post Service
+New IPostService and PostService.
+
+## Integration Tets
+New Integration Tests for Add, Update and Delete Posts.
+
+## Post Controller
+New PostController with 5 ew endpoints:
+
+-AddPostAsync
+
+-UpdatePostAsync
+
+-DeletePostAsync
+
+-GetAllPosts
+
+-GetCurrentUserPosts
+
 ## Build and Test
 To build the project, an appsetings.json file, that defines a connection, needs to be added to APICore.API project's root. Also a sample appsettings is provided in order you can duplicat it and adjust the values as per your needs.
 
