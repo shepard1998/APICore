@@ -16,12 +16,14 @@ namespace APICore.Data.UoW
             UserTokenRepository ??= new GenericRepository<UserToken>(_context);
             SettingRepository ??= new GenericRepository<Setting>(_context);
             LogRepository ??= new GenericRepository<Log>(_context);
+            PostRepository ??= new GenericRepository<Post>(_context);
         }
 
         public IGenericRepository<User> UserRepository { get; set; }
         public IGenericRepository<UserToken> UserTokenRepository { get; set; }
         public IGenericRepository<Setting> SettingRepository { get; set; }
         public IGenericRepository<Log> LogRepository { get; set; }
+        public IGenericRepository<Post> PostRepository { get; set; }
 
         public async Task<int> CommitAsync()
         {
