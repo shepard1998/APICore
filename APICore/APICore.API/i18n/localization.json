@@ -150,6 +150,13 @@
       "es-ES": "Actualización de Token no encontrado."
     }
   },
+  {
+    "key": "404004",
+    "LocalizedValue": {
+      "en-Us": "Post not found.",
+      "es-Es": "Publicación no encontrada."
+    }
+  },
   //RequestTimeout
   {
     "Key": "408",
